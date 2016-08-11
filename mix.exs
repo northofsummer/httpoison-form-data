@@ -29,6 +29,7 @@ defmodule FormData.Mixfile do
   defp package do
     [name: :httpoison_form_data,
      licenses: ["MIT"],
+     links: %{"GitHub" => "https://github.com/spiceworks/httpoison-form-data"},
      maintainers: ["Spiceworks, Inc.", "asonix.dev@gmail.com"]]
   end
 
