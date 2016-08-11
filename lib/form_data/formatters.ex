@@ -6,7 +6,7 @@ defmodule FormData.Formatters do
   @doc """
   This function takes three arguments, `name`, `value`, and `file` and returns a
   list of the partially formatted data.
-  
+
   The List is an important part of the formatting process because it can easily
   be converted into a number of other formats (for example, a string) in the
   output function.

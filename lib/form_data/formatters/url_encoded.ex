@@ -1,7 +1,7 @@
 defmodule FormData.Formatters.URLEncoded do
   @behaviour FormData.Formatters
 
-  @doc ~S"""
+  @doc """
   Format `name` and `value` as a key-value tuple.
 
   When the name or value of a parameter are absent, the parameter is ignored.
@@ -11,26 +11,26 @@ defmodule FormData.Formatters.URLEncoded do
 
   ## Examples
 
-    iex> FormData.Formatters.URLEncoded.format("Name", "Value", false)
-    {"Name", "Value"}
+      iex> FormData.Formatters.URLEncoded.format("Name", "Value", false)
+      {"Name", "Value"}
 
-    iex> FormData.Formatters.URLEncoded.format("Name", "Value", true)
-    nil
+      iex> FormData.Formatters.URLEncoded.format("Name", "Value", true)
+      nil
 
-    iex> FormData.Formatters.URLEncoded.format("", "Value", false)
-    nil
+      iex> FormData.Formatters.URLEncoded.format("", "Value", false)
+      nil
 
-    iex> FormData.Formatters.URLEncoded.format("Name", "", false)
-    nil
+      iex> FormData.Formatters.URLEncoded.format("Name", "", false)
+      nil
 
-    iex> FormData.Formatters.URLEncoded.format(nil, "Value", false)
-    nil
+      iex> FormData.Formatters.URLEncoded.format(nil, "Value", false)
+      nil
 
-    iex> FormData.Formatters.URLEncoded.format("Name", nil, false)
-    nil
+      iex> FormData.Formatters.URLEncoded.format("Name", nil, false)
+      nil
 
-    iex> FormData.Formatters.URLEncoded.format("Name", "Value", nil)
-    nil
+      iex> FormData.Formatters.URLEncoded.format("Name", "Value", nil)
+      nil
 
   """
   def format("", _, _), do: nil
@@ -41,7 +41,7 @@ defmodule FormData.Formatters.URLEncoded do
   def format(_, _, true), do: nil
   def format(name, value, false), do: {"#{name}", "#{value}"}
 
-  @doc ~S"""
+  @doc """
   Format a `list` of key-value tuples for URL Encoded requests.
 
   Since URLEncoded parameters can be used in GET and POST requests, the
@@ -54,14 +54,14 @@ defmodule FormData.Formatters.URLEncoded do
 
   ## Examples
 
-    iex> FormData.Formatters.URLEncoded.output([{"Name", "Value"}, {"Name2", "Value2"}], [])
-    {:form, [{"Name", "Value"}, {"Name2", "Value2"}]}
+      iex> FormData.Formatters.URLEncoded.output([{"Name", "Value"}, {"Name2", "Value2"}], [])
+      {:form, [{"Name", "Value"}, {"Name2", "Value2"}]}
 
-    iex> FormData.Formatters.URLEncoded.output([{"Name", "Value"}, {"Name2", "Value2"}], get: true)
-    [params: [{"Name", "Value"}, {"Name2", "Value2"}]]
+      iex> FormData.Formatters.URLEncoded.output([{"Name", "Value"}, {"Name2", "Value2"}], get: true)
+      [params: [{"Name", "Value"}, {"Name2", "Value2"}]]
 
-    iex> FormData.Formatters.URLEncoded.output([{"Name", "Value"}, {"Name2", "Value2"}], url: true)
-    "?Name=Value&Name2=Value2"
+      iex> FormData.Formatters.URLEncoded.output([{"Name", "Value"}, {"Name2", "Value2"}], url: true)
+      "?Name=Value&Name2=Value2"
 
   """
   def output([], [url: true]), do: ""
