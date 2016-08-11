@@ -2,7 +2,7 @@ defmodule FormData.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :form_data,
+    [app: :httpoison_form_data,
      version: "0.1.0",
      elixir: "~> 1.3",
      build_embedded: Mix.env == :prod,
