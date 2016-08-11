@@ -72,7 +72,7 @@ defmodule FormData.Formatters.Multipart do
   ## Examples
 
     iex> FormData.Formatters.Multipart.output(["one", "two"], [])
-    {:multipart, ["one", "two"]}
+    { :multipart, ["one", "two"] }
 
   """
   def output(list, _opts), do: {:multipart, list}
