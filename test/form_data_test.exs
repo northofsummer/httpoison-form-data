@@ -4,8 +4,13 @@ defmodule FormDataTest do
 
  defmodule FormDataTest.NameFormatter do
    @behaviour FormData.Formatters
-   def format(name, _value, _file), do: "#{name}"
-   def output(list, _opts), do: list
+   def output(stream, _opts) do
+     stream
+     |> Stream.map(&format(&1))
+     |> Enum.to_list
+   end
+
+   defp format({name, _value}), do: "#{name}"
  end
 
   setup do

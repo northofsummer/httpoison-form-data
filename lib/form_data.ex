@@ -79,14 +79,14 @@ defmodule FormData do
   # required data structure with to_form's recursive traversal with a chained
   # nil-removal filter (in the same pass because streams).
   #
-  # Finally, it passes a list to the output formatter.
+  # Finally, it passes a stream of key-value pairs to the output formatter,
+  # which will coerce this into any required format.
   defp do_create(obj, formatter, output_opts) do
     f = Map.get(@formatters, formatter) || formatter
 
     obj
-    |> to_form(f)
+    |> to_form
     |> Stream.filter(&not_nil(&1))
-    |> Enum.to_list
     |> f.output(output_opts)
   end
 
@@ -108,66 +108,68 @@ defmodule FormData do
   # nested_pair_to_form because we don't want the names at this point to be in
   # brackets.
   #
-  # input:          %{"key" => "value"}, formatter
-  # recursing call: to_form("value", "key", formatter)
+  # input:          %{"key" => "value"}
+  # recursing call: to_form("value", "key")
   #
-  # input:          %{"key" => [ "value1", "value2" ]}, formatter
-  # recursing call: to_form([ "value1", "value2" ], "key", formatter)
-  defp to_form(obj, formatter) do
-    Stream.flat_map(obj, &pair_to_form(&1, "", formatter))
+  # input:          %{"key" => [ "value1", "value2" ]}
+  # recursing call: to_form([ "value1", "value2" ], "key")
+  defp to_form(obj) do
+    Stream.flat_map(obj, &pair_to_form(&1, ""))
   end
 
   # when we encounter a File struct as a value, we have reached the max depth of
   # this tree, return the formatted data in an array. The array is important
   # because it is flat_map'd out of the array. This function must come before
   # the declaration of the is_map because structs will return true for is_map.
-  defp to_form(%File{path: path}, name, formatter) do
-    [formatter.format(name, path, true)]
+  defp to_form(%File{}=file, name) do
+    [{name, file}]
   end
 
   # When we have a nested map, we want to call nested_pair_to_form on each
   # key/value pair.
   #
-  # input:          %{"key" => "value"}, "outer_key", formatter
-  # recursing call: to_form("value", "outer_key[key]", formatter)
-  defp to_form(obj, name, formatter) when is_map(obj) do
+  # input:          %{"key" => "value"}, "outer_key"
+  # recursing call: to_form("value", "outer_key[key]")
+  defp to_form(obj, name) when is_map(obj) do
     obj
     |> ensure_keyword
-    |> Stream.flat_map(&nested_pair_to_form(&1, name, formatter))
+    |> Stream.flat_map(&nested_pair_to_form(&1, name))
   end
 
   # Tuples are converted to lists, since they behave similarly.
-  defp to_form(obj, name, formatter) when is_tuple(obj) do
+  defp to_form(obj, name) when is_tuple(obj) do
     Tuple.to_list(obj)
-    |> to_form(name, formatter)
+    |> to_form(name)
   end
 
   # Lists are simply iterated across. We append `[]` to the name provided.
   #
-  # input:          ["value1", "value2", "value3"], "outer_key", formatter
-  # recursing call: [to_form("value1", "outer_key[]", formatter),
-  #                  to_form("value2", "outer_key[]", formatter),
-  #                  to_form("value3", "outer_key[]", formatter)]
-  defp to_form(obj, name, formatter) when is_list(obj) do
-    Stream.flat_map(obj, &to_form(&1, name <> "[]", formatter))
+  # input:          ["value1", "value2", "value3"], "outer_key",
+  # recursing call: [to_form("value1", "outer_key[]"),
+  #                  to_form("value2", "outer_key[]"),
+  #                  to_form("value3", "outer_key[]")]
+  defp to_form(obj, name) when is_list(obj) do
+    Stream.flat_map(obj, &to_form(&1, name <> "[]"))
   end
 
   # When we have a value that does not fit the above conditions, we assume
   # we have reached a value that is not a nested data structure and therefore
-  # can safely pass it to the provided formatter.
-  defp to_form(value, name, formatter) do
-    [formatter.format(name, value, false)]
+  # can safely return it.
+  defp to_form(value, name) do
+    [{name, value}]
   end
 
-  defp pair_to_form({k, v}, name, formatter) do
-    to_form(v, name <> "#{k}", formatter)
+  defp pair_to_form({k, v}, name) do
+    to_form(v, name <> "#{k}")
   end
 
-  defp nested_pair_to_form({k, v}, name, formatter) do
-    to_form(v, name <> "[#{k}]", formatter)
+  defp nested_pair_to_form({k, v}, name) do
+    to_form(v, name <> "[#{k}]")
   end
 
   defp not_nil(nil), do: false
+  defp not_nil({nil, _}), do: false
+  defp not_nil({_, nil}), do: false
   defp not_nil(_), do: true
 
 end
