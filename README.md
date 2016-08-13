@@ -101,14 +101,6 @@ HTTPoison.get("some.url/", %{}, params: [
   {"three", "four"}
 ])
 ```
-#### Example 4
-```elixir
-with {:ok, payload} <- FormData.create(other_structure, :url_encoded, url: true),
-  do: HTTPoison.get("some.url/" <> payload)
-
-# The above code produces the following request
-HTTPoison.get("some.url/?one=two&three=four")
-```
 
 ## Notes
 Although the examples do not show this, `url_encoded` formdata supports nested
