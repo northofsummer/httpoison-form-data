@@ -19,6 +19,10 @@ defmodule FormData do
 
   defmodule File do
     defstruct path: ""
+
+    def new(path) do
+      %FormData.File{path: path}
+    end
   end
 
   @formatters %{
